@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<title>Happy 19th Birthday Lamoorti 🎂❤️</title>
+
+<style>
+:root{
+  --bg:#090d15;
+  --card:#111827;
+  --accent:#ff5c8a;
+  --soft:#ffd1e1;
+  --muted:#9ca3af;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:linear-gradient(180deg,#111827,#090d15);
+  color:white;
+}
+
+.container{
+  max-width:390px; /* iPhone 11 width */
+  margin:auto;
+  padding:16px;
+}
+
+h1{
+  text-align:center;
+  font-size:32px;
+  margin:14px 0 6px;
+}
+
+h1 span{
+  color:var(--accent);
+}
+
+.subtitle{
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+  margin-bottom:18px;
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border-radius:26px;
+  padding:14px;
+  box-shadow:0 25px 60px rgba(0,0,0,.7);
+}
+
+/* SLIDESHOW — iPhone 11 ratio */
+.slideshow{
+  position:relative;
+  aspect-ratio:9/19.5;
+  border-radius:22px;
+  overflow:hidden;
+}
+
+.slide{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity 1.4s ease;
+}
+
+.slide img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.slide.active{opacity:1}
+
+/* dots */
+.dots{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-top:10px;
+}
+
+.dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#444;
+}
+.dot.active{background:var(--accent)}
+
+/* countdown */
+.countdown{
+  display:flex;
+  justify-content:space-between;
+  margin-top:16px;
+}
+
+.time{
+  flex:1;
+  margin:0 4px;
+  background:rgba(255,255,255,.05);
+  border-radius:14px;
+  padding:10px 0;
+  text-align:center;
+}
+
+.time .num{
+  font-size:18px;
+  font-weight:700;
+}
+.time .lbl{
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* message */
+.message{
+  text-align:center;
+  margin-top:18px;
+  font-size:15px;
+  line-height:1.7;
+  color:var(--soft);
+  animation:fade 2s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+
+/* hearts */
+.hearts{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:20;
+}
+.heart{
+  position:absolute;
+  bottom:-40px;
+  font-size:22px;
+  animation:floatUp linear forwards;
+}
+@keyframes floatUp{
+  0%{transform:translateY(0) scale(.7);opacity:0}
+  15%{opacity:1}
+  100%{transform:translateY(-120vh) scale(1.4);opacity:0}
+}
+
+/* confetti */
+.confetti{
+  position:fixed;
+  top:-10px;
+  width:10px;
+  height:14px;
+  opacity:.9;
+  animation:confettiFall linear forwards;
+  z-index:30;
+}
+@keyframes confettiFall{
+  to{transform:translateY(110vh) rotate(720deg)}
+}
+
+/* music player */
+.player{
+  position:fixed;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(8px);
+  padding:8px 14px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.player button{
+  border:none;
+  background:var(--accent);
+  color:white;
+  padding:6px 14px;
+  border-radius:12px;
+  font-weight:600;
+}
+
+.player span{
+  font-size:13px;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<div class="container">
+  <h1>Happy <span>19th</span> Birthday 🎂</h1>
+  <div class="subtitle">Lamoorti ❤️ · 18 November 2006</div>
+
+  <div class="card">
+    <div class="slideshow" id="slideshow"></div>
+    <div class="dots" id="dots"></div>
+
+    <div class="countdown" id="countdown"></div>
+
+    <div class="message" id="msg">
+      Nineteen years ago, a beautiful soul was born.  
+      You are my happiness, my safe place,  
+      and my favorite person in this world ❤️
+    </div>
+  </div>
+</div>
+
+<div class="player">
+  <button id="play">Play</button>
+  <span id="status">Tap to play 🎶</span>
+</div>
+
+<audio id="music" src="song.mp3" loop></audio>
+
+<script>
+/* slideshow */
+const imgs=["Images/1.jpeg","Images/2.jpeg","Images/3.jpeg","Images/4.jpeg"];
+let i=0;
+const s=document.getElementById("slideshow");
+const d=document.getElementById("dots");
+
+imgs.forEach((src,j)=>{
+  const div=document.createElement("div");
+  div.className="slide"+(j===0?" active":"");
+  div.innerHTML=`<img src="${src}">`;
+  s.appendChild(div);
+
+  const dot=document.createElement("div");
+  dot.className="dot"+(j===0?" active":"");
+  dot.onclick=()=>show(j);
+  d.appendChild(dot);
+});
+
+function show(n){
+  document.querySelectorAll(".slide").forEach((el,j)=>el.classList.toggle("active",j===n));
+  document.querySelectorAll(".dot").forEach((el,j)=>el.classList.toggle("active",j===n));
+  i=n;
+}
+setInterval(()=>show(i=(i+1)%imgs.length),5000);
+
+/* countdown Palestine */
+const birthday=new Date(Date.UTC(2006,10,18));
+const wrap=document.getElementById("countdown");
+const msg=document.getElementById("msg");
+
+function confetti(){
+  const c=document.createElement("div");
+  c.className="confetti";
+  c.style.left=Math.random()*100+"vw";
+  c.style.background=["#ff5c8a","#ffd166","#4cc9f0","#06d6a0"][Math.floor(Math.random()*4)];
+  c.style.animationDuration=(4+Math.random()*4)+"s";
+  document.body.appendChild(c);
+  setTimeout(()=>c.remove(),9000);
+}
+
+function tick(){
+  const now=new Date(Date.now()+3*3600000);
+  const diff=birthday-now;
+
+  if(diff<=0){
+    wrap.innerHTML="";
+    msg.innerHTML="🎂✨ Happy 19th Birthday Lamoorti ❤️✨<br>You are my forever.";
+    if(!window.party){
+      window.party=true;
+      setInterval(confetti,250);
+    }
+    return;
+  }
+
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor(diff/3600000)%24;
+  const m=Math.floor(diff/60000)%60;
+  const s=Math.floor(diff/1000)%60;
+
+  wrap.innerHTML=`
+    <div class="time"><div class="num">${d}</div><div class="lbl">Days</div></div>
+    <div class="time"><div class="num">${h}</div><div class="lbl">Hours</div></div>
+    <div class="time"><div class="num">${m}</div><div class="lbl">Minutes</div></div>
+    <div class="time"><div class="num">${s}</div><div class="lbl">Seconds</div></div>
+  `;
+}
+setInterval(tick,1000); tick();
+
+/* hearts */
+const h=document.getElementById("hearts");
+setInterval(()=>{
+  const e=document.createElement("div");
+  e.className="heart";
+  e.textContent="❤️";
+  e.style.left=Math.random()*100+"vw";
+  e.style.fontSize=18+Math.random()*22+"px";
+  const t=5000+Math.random()*5000;
+  e.style.animationDuration=t+"ms";
+  h.appendChild(e);
+  setTimeout(()=>e.remove(),t);
+},800);
+
+/* music */
+const music=document.getElementById("music");
+const play=document.getElementById("play");
+const status=document.getElementById("status");
+let on=false;
+
+play.onclick=()=>{
+  on?music.pause():music.play();
+  on=!on;
+  play.textContent=on?"Pause":"Play";
+  status.textContent=on?"Playing ❤️":"Paused";
+};
+
+document.addEventListener("click",function once(){
+  music.play().catch(()=>{});
+  on=true;
+  play.textContent="Pause";
+  status.textContent="Playing ❤️";
+  document.removeEventListener("click",once);
+});
+</script>
+
+</body>
+</html>
